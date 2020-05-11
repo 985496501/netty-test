@@ -37,15 +37,28 @@ public class DiscardServer {
             // ServerBootstrap is a helper class to set up a server, you can use a channel directly.
             // Note that that's a tedious process, you do not need to that in most cases.
             ServerBootstrap b = new ServerBootstrap();
+            // handle events and IO for ServerChannel, Channel
+            // workerGroup is b's EventLoopGroup childGroup and bossGroup is b's EventLoopGroup group
+            // return ServerBootstrap.
             b.group(bossGroup, workerGroup)
                     // NioServerSocketChannel which is used to instantiate a new channel to accept incoming connection.
+                    // return ServerBootstrap.
+                    // ChannelFactory<NioServerSocketChannel> channelFactory = new ReflectiveChannelFactory<NioServerSocketChannel>
+                    // Constructor<NioServerSocketChannel> constructor
                     .channel(NioServerSocketChannel.class)
+//                    .channelFactory(NioServerSocketChannel.class)
                     // The handler specified here will always be evaluated by a newly accept channel,
                     // ChannelInitializer is a special handler to help user to configure a new channel.
                     // It's most likely that you want to configure ChannelPipeline of the new Channel
                     // by adding some handlers such as DiscardServerHandler to implement your network application.
                     // As application gets complicated, you add more handlers to the pipeline,
                     // and extract this anonymous class into a top-level class eventually.
+
+                    // need: ChannelHandler   ||    childHandler <ChannelHandler>
+                    // SocketChannel: A TCP/IP socket {@link Channel}. pipeline() all channel have.
+                    // ChannelHandler childHandler = new ChannelInitializer<SocketChannel>();
+                    // pipeline.addLast(ChannelHandler...) insert ChannelHandler.
+                    // ServerBootstrap
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
@@ -54,8 +67,12 @@ public class DiscardServer {
                     })
                     // refer to ChannelOption and ChannelConfig
                     // option is for NioServerSocketChannel to accept incoming connections.
+                    // private final Map<ChannelOption<?>, Object> options = new LinkedHashMap<ChannelOption<?>, Object>();
+                    // ServerBootstrap
                     .option(ChannelOption.SO_BACKLOG, 128)
                     // childOption is for channels accepted by the parent ServerChannel
+                    // Map<ChannelOption<?>, Object> childOptions = new LinkedHashMap<ChannelOption<?>, Object>();
+                    // ServerBootstrap
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
             // Bind and start to accept incoming connections.
